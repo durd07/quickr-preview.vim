@@ -59,25 +59,30 @@ if (!has('nvim') && v:version >= 801) || has('nvim')
         if !exists('b:qftick')
             let b:qftick = -1
         endif
+        if !exists('b:qftitle')
+            let b:qftitle = "XXX"
+        endif
         " Grab the info for current window
         let l:wininfo = getwininfo(win_getid())[0]
         " Process location list
         if l:wininfo.loclist
-            let l:info = getloclist(0, {'changedtick':1, 'size':1})
-            if l:info.changedtick != b:qftick
+            let l:info = getloclist(0, {'changedtick':1, 'size':1, 'title' : 1})
+            if l:info.changedtick != b:qftick || l:info.title != b:qftitle
                 let b:qflist = getloclist(0)
                 let b:qfsize = l:info.size
                 let b:qftick = l:info.changedtick
+		let b:qftitle = l:info.title
             endif
             return 1
         endif
         " Process quickfix list
         if l:wininfo.quickfix
-            let l:info = getqflist({'changedtick':1, 'size':1})
-            if l:info.changedtick != b:qftick
+            let l:info = getqflist({'changedtick':1, 'size':1, 'title' : 1})
+            if l:info.changedtick != b:qftick || l:info.title != b:qftitle
                 let b:qflist = getqflist()
                 let b:qfsize = l:info.size
                 let b:qftick = l:info.changedtick
+		let b:qftitle = l:info.title
             endif
             return 1
         endif
@@ -265,7 +270,7 @@ endfunction
 augroup QuickrPreviewQfAutoCmds
     autocmd! * <buffer>
     " Auto close preview window when closing/deleting the qf/loc list
-    autocmd BufDelete <buffer> silent! pclose
+    autocmd WinClosed <buffer> silent! pclose
     " Auto open preview window while scrolling through the qf/loc list
     if g:quickr_preview_on_cursor
         autocmd CursorMoved <buffer> nested silent call QFMove(line("."))
