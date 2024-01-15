@@ -157,7 +157,9 @@ if has('timers')
         endif
     endfunction
     function! InvokeQFList(timer)
-        unlet b:quickr_preview_timer
+	if exists('b:quickr_preview_timer')
+            unlet b:quickr_preview_timer
+        endif
         silent call QFList(line('.'))
     endfunction
 else
